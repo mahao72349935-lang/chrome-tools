@@ -39,20 +39,27 @@
           </div>
         </template>
         <div class="result-content">
-          <el-input v-model="jsonStr" type="textarea" :rows="14" readonly class="json-preview" />
+          <el-input v-model="jsonStr" type="textarea" :rows="10" readonly class="json-preview" />
           <div class="result-actions">
             <div class="mock-data-wrap">
               <el-checkbox v-model="useDeepSeekMock" size="small" class="gold-checkbox">
-                是否需要生成假数据
+                生成mock数据
               </el-checkbox>
-              <span v-if="useDeepSeekMock" class="mock-count-wrap">
-                <el-input-number v-model="mockCount" :min="1" :max="100" size="small" class="mock-count-input"
-                  controls-position="right" />
-                <span class="mock-count-unit">条</span>
-              </span>
+              <template v-if="useDeepSeekMock">
+                <span class="mock-count-wrap">
+                  <el-input-number v-model="mockCount" :min="1" :max="100" size="small" class="mock-count-input"
+                    controls-position="right" />
+                  <span class="mock-count-unit">条</span>
+                </span>
+                <el-button class="gold-btn" size="small" :loading="generateLoading" @click="handleGenerateData">
+                  生成数据
+                </el-button>
+              </template>
             </div>
+            <el-input v-model="mockData" type="textarea" :rows="10" placeholder="请粘贴或输入mock数据（JSON 数组格式），点击「生成数据」将自动填充"
+              class="mock-data-input" />
             <div class="result-header-actions">
-              <el-button class="gold-btn" size="small" @click="handleRunScript">
+              <el-button class="gold-btn" size="small" :disabled="!canRunScript" @click="handleRunScript">
                 运行脚本
               </el-button>
             </div>
@@ -70,13 +77,17 @@ import { ElMessage } from 'element-plus';
 import { ArrowLeft, CircleCheck } from '@element-plus/icons-vue';
 import AppCard from '../../components/AppCard/AppCard.vue';
 import { runPlaywright } from '../../api/playwright';
+import { generateMockData } from '../../utils/deepseek';
 import { clickPageButton } from '../../utils/click-page-button';
+import { getFormFieldsScript } from '../../utils/form-fields';
 
 const router = useRouter();
 const loading = ref(false);
 const error = ref('');
 const useDeepSeekMock = ref(false);
 const mockCount = ref(1);
+const mockData = ref('');
+const generateLoading = ref(false);
 const pageInfo = ref<{
   title?: string;
   url?: string;
@@ -90,106 +101,9 @@ const jsonStr = computed(() => {
   return JSON.stringify(pageInfo.value.formFields || [], null, 2);
 });
 
+const canRunScript = computed(() => !!mockData.value?.trim());
+
 const goBack = () => router.push('/');
-
-const getFormFieldsScript = () => {
-  const getInputType = (item: Element) => {
-    const content = item.querySelector('.el-form-item__content');
-    if (!content) return 'input';
-    if (content.querySelector('.el-select')) return 'select';
-    if (content.querySelector('.el-date-editor')) return 'date';
-    if (content.querySelector('.el-input-number')) return 'number';
-    if (content.querySelector('textarea')) return 'textarea';
-    return 'input';
-  };
-
-  const getPropFromVue = (el: Element): string => {
-    try {
-      const anyEl = el as any;
-      // Vue 3: el-form-item 根元素的 __vueParentComponent 即 FormItem 组件实例
-      const comp = anyEl.__vueParentComponent;
-      if (comp?.props?.prop) {
-        const p = comp.props.prop;
-        return Array.isArray(p) ? p.join('.') : String(p);
-      }
-      // Vue 2 / Element UI: 根元素的 __vue__ 即 FormItem 组件实例
-      const vue2Comp = anyEl.__vue__;
-      if (vue2Comp?.prop) {
-        const p = vue2Comp.prop;
-        return Array.isArray(p) ? p.join('.') : String(p);
-      }
-    } catch {
-      /* ignore */
-    }
-    return '';
-  };
-
-  const getFormFields = (container: Document | Element) => {
-    const items = container.querySelectorAll('.el-form-item');
-    return Array.from(items)
-      .map((item: Element, index: number) => {
-        const labelEl = item.querySelector('.el-form-item__label');
-        const label = labelEl?.textContent?.trim() || '';
-        const prop =
-          item.getAttribute('prop') ||
-          getPropFromVue(item) ||
-          (item.querySelector('input, textarea')?.getAttribute('name') || '').trim();
-        const input = item.querySelector('input, textarea');
-        const placeholder = (input?.getAttribute('placeholder') || label || '') as string;
-        const name =
-          prop ||
-          (label ? label.replace(/\s/g, '') : `field_${index}`);
-        return {
-          name,
-          type: getInputType(item),
-          placeholder: placeholder || label,
-          label: label || placeholder,
-        };
-      })
-      .filter((f: { label: string; placeholder: string }) => f.label || f.placeholder);
-  };
-
-  const getPageInfo = () => {
-    const dialogs = document.querySelectorAll('.el-dialog');
-    let dialog: Element | null = null;
-    for (let i = dialogs.length - 1; i >= 0; i--) {
-      const d = dialogs[i];
-      const rect = d.getBoundingClientRect();
-      const parent = d.closest('.el-overlay-dialog, .el-dialog__wrapper');
-      const hidden = parent && getComputedStyle(parent).display === 'none';
-      if (rect.width > 0 && rect.height > 0 && !hidden) {
-        dialog = d;
-        break;
-      }
-    }
-    if (!dialog) dialog = document.querySelector('.el-dialog');
-
-    const dialogInfo = dialog
-      ? {
-        title: dialog.querySelector('.el-dialog__title')?.textContent?.trim(),
-        bodyText: dialog.querySelector('.el-dialog__body')?.textContent?.trim(),
-        visible: true,
-      }
-      : null;
-
-    const container = dialog ? dialog.querySelector('.el-dialog__body') : null;
-    const formFields = container ? getFormFields(container) : [];
-
-    // 通过 el-menu-item.is-active 获取当前激活的菜单名称
-    const activeMenuItem = document.querySelector('.el-menu-item.is-active');
-    const menuName = activeMenuItem?.textContent?.trim() || '';
-
-    return {
-      title: document.title,
-      url: window.location.href,
-      dialog: dialogInfo,
-      formFields,
-      menuName,
-    };
-  };
-
-  return getPageInfo();
-};
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -197,6 +111,7 @@ const handleGetFields = async () => {
   loading.value = true;
   error.value = '';
   pageInfo.value = null;
+  mockData.value = '';
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) {
@@ -238,16 +153,55 @@ const handleGetFields = async () => {
 };
 
 
+const handleGenerateData = async () => {
+  if (!pageInfo.value?.formFields?.length) {
+    ElMessage.warning('请先获取表单字段');
+    return;
+  }
+  generateLoading.value = true;
+  error.value = '';
+  try {
+    const res = await generateMockData({
+      formFields: pageInfo.value.formFields,
+      mockCount: mockCount.value,
+    });
+    if (res?.success && res?.data) {
+      mockData.value = res.data;
+      ElMessage.success('假数据生成成功');
+    } else {
+      error.value = res?.message || '生成失败';
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '生成假数据失败';
+  } finally {
+    generateLoading.value = false;
+  }
+};
+
 const handleRunScript = async () => {
+  if (!canRunScript.value) return;
+  const raw = mockData.value.trim();
+  let mockDataArr: Record<string, unknown>[] = [];
+  try {
+    const parsed = JSON.parse(raw);
+    mockDataArr = Array.isArray(parsed) ? parsed : [parsed];
+  } catch {
+    error.value = 'mockData 格式无效，请确保是有效的 JSON 数组';
+    return;
+  }
   const params = {
     formFields: pageInfo.value?.formFields || [],
     location: pageInfo.value?.url || '',
     menuName: pageInfo.value?.menuName || '',
-    useDeepSeekMock: useDeepSeekMock.value,
-    mockCount: useDeepSeekMock.value ? mockCount.value : undefined,
+    mockData: mockDataArr,
   };
   console.log('params: ', params);
   const res = await runPlaywright(params);
+  if (res.success) {
+    ElMessage.success('脚本运行成功，请等待数据填充');
+  } else {
+    ElMessage.error('脚本运行失败');
+  }
   console.log(res);
 };
 </script>
@@ -303,7 +257,7 @@ const handleRunScript = async () => {
 .content {
   flex: 1;
   overflow: auto;
-  padding: 0 10px;
+  padding: 0 10px 10px;
 }
 
 .tip-alert {
@@ -357,7 +311,7 @@ const handleRunScript = async () => {
 .result-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  height: 36px;
 }
 
 .success-title {
@@ -379,11 +333,16 @@ const handleRunScript = async () => {
 
   .mock-data-wrap {
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    height: 34px;
+    width: 100%;
+    height: 36px;
   }
 }
+
+
 
 .mock-count-wrap {
   display: flex;
@@ -466,10 +425,15 @@ const handleRunScript = async () => {
   color: #0d0d0d !important;
 }
 
-.gold-btn:hover {
+.gold-btn:hover:not(:disabled) {
   background: #e6b73d !important;
   border-color: #e6b73d !important;
   color: #0d0d0d !important;
+}
+
+.gold-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .gold-checkbox :deep(.el-checkbox__label) {
@@ -537,6 +501,26 @@ const handleRunScript = async () => {
 }
 
 .json-preview :deep(.el-textarea__inner)::-webkit-scrollbar {
+  display: none;
+}
+
+.mock-data-input {
+  flex: 1;
+  min-width: 100%;
+}
+
+.mock-data-input :deep(.el-textarea__inner) {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: #262626;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  box-shadow: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mock-data-input :deep(.el-textarea__inner)::-webkit-scrollbar {
   display: none;
 }
 </style>
