@@ -21,6 +21,12 @@ const router = createRouter({
       component: () => import('../views/dialog-form-fields/DialogFormFields.vue'),
       meta: { title: '获取弹窗页面表单字段类型' },
     },
+    {
+      path: '/delete-data',
+      name: 'DeleteData',
+      component: () => import('../views/delete-data/DeleteData.vue'),
+      meta: { title: '删除数据' },
+    },
   ],
 });
 
