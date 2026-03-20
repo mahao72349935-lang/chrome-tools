@@ -7,15 +7,12 @@
   <div class="home">
     <h1 class="title">mh-tools 工具箱</h1>
     <ul class="feature-list">
-      <li
-        v-for="item in features"
-        :key="item.path"
-        class="feature-item"
-        @click="goTo(item.path)"
-      >
+      <li v-for="item in features" :key="item.path" class="feature-item" @click="goTo(item.path)">
         <span class="feature-name">{{ item.name }}</span>
         <span class="feature-desc">{{ item.desc }}</span>
-        <el-icon class="arrow"><ArrowRight /></el-icon>
+        <el-icon class="arrow">
+          <ArrowRight />
+        </el-icon>
       </li>
     </ul>
   </div>
@@ -33,6 +30,11 @@ const features = [
     path: '/dialog-form-fields',
     desc: '从当前页面的 Element UI 弹窗中提取表单字段及类型',
   },
+  {
+    name: '删除数据',
+    path: '/delete-data',
+    desc: '删除当前页面的数据',
+  }
   // 后续可在此添加更多功能
 ];
 
