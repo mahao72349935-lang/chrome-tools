@@ -6,16 +6,16 @@
 import { http } from '../utils/request';
 
 export interface RunDeleteParams {
-  label: string;
-  value: string;
-  location: string;
-  menuName?: string;
+	/** 多条筛选条件：[{ label, value }, ...] */
+	filters: Array<{ label: string; value: string }>;
+	location: string;
+	menuName?: string;
 }
 
 export interface RunDeleteResponse {
-  success?: boolean;
-  message?: string;
-  [key: string]: unknown;
+	success?: boolean;
+	message?: string;
+	[key: string]: unknown;
 }
 
 /**
@@ -23,10 +23,9 @@ export interface RunDeleteResponse {
  * POST /api/run-delete
  */
 export function runDelete(params: RunDeleteParams): Promise<RunDeleteResponse> {
-  return http<RunDeleteResponse>({
-    url: '/api/run-delete',
-    method: 'POST',
-    data: params,
-  });
+	return http<RunDeleteResponse>({
+		url: '/api/run-delete',
+		method: 'POST',
+		data: params,
+	});
 }
-

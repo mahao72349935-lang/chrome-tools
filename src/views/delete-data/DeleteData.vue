@@ -1,4 +1,11 @@
 <!--
+ * @Description: 
+ * @Author: mahao
+ * @Date: 2026-03-20 16:25:01
+ * @LastEditors: mahao
+ * @LastEditTime: 2026-03-20 17:20:50
+-->
+<!--
  * @Description: 删除数据 - label/value
  * @Author: mahao
  * @Date: 2026-03-20
@@ -46,8 +53,13 @@
           </div>
 
           <div class="form">
-            <el-input v-model="deleteLabel" placeholder="label（要匹配/删除的字段名）" class="field-input" />
-            <el-input v-model="deleteValue" placeholder="value（要删除的具体值）" class="field-input" />
+            <div class="form-actions">
+              <el-button class="gold-btn" size="small" :loading="fetching" @click="handleFetchFilters">
+                获取筛选条件
+              </el-button>
+            </div>
+            <el-input v-model="filtersText" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }"
+              placeholder='筛选条件数组，如：[{"label":"名称","value":"张三"}]' class="field-input" />
           </div>
 
           <div class="actions">
@@ -68,22 +80,31 @@ import { ElMessage } from 'element-plus';
 import { ArrowLeft, CircleCheck } from '@element-plus/icons-vue';
 import AppCard from '../../components/AppCard/AppCard.vue';
 import { runDelete } from '../../api/delete';
+import { getFilterFormItems } from '../../utils/get-filter-form-items';
 
 const router = useRouter();
 const loading = ref(false);
+const fetching = ref(false);
 const error = ref('');
 
 const location = ref('');
 const menuName = ref('');
 
-const deleteLabel = ref('');
-const deleteValue = ref('');
+const filtersText = ref('');
 
 const goBack = () => router.push('/');
 
-const canDelete = computed(() => {
-  return !!deleteLabel.value.trim() && !!deleteValue.value.trim();
+const parsedFilters = computed<Array<{ label: string; value: string }>>(() => {
+  try {
+    const arr = JSON.parse(filtersText.value);
+    if (Array.isArray(arr) && arr.length > 0 && arr.every((f: any) => f.label && f.value)) {
+      return arr;
+    }
+  } catch { }
+  return [];
 });
+
+const canDelete = computed(() => parsedFilters.value.length > 0);
 
 const getContextScript = () => {
   const activeMenu =
@@ -118,6 +139,37 @@ const loadContext = async () => {
   }
 };
 
+const handleFetchFilters = async () => {
+  fetching.value = true;
+  error.value = '';
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) {
+      error.value = '无法获取当前标签页';
+      return;
+    }
+
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: getFilterFormItems,
+    });
+
+    const filters = results?.[0]?.result || [];
+    if (!filters.length) {
+      ElMessage.warning('未获取到有值的筛选条件');
+      return;
+    }
+
+    filtersText.value = JSON.stringify(filters, null, 2);
+    ElMessage.success(`已获取 ${filters.length} 个筛选条件`);
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '获取筛选条件失败';
+  } finally {
+    fetching.value = false;
+  }
+};
+
 const handleDelete = async () => {
   if (!canDelete.value) return;
   if (!location.value) {
@@ -130,8 +182,7 @@ const handleDelete = async () => {
 
   try {
     const res = await runDelete({
-      label: deleteLabel.value.trim(),
-      value: deleteValue.value.trim(),
+      filters: parsedFilters.value,
       location: location.value,
       menuName: menuName.value || '',
     });
@@ -271,6 +322,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .field-input {
