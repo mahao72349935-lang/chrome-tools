@@ -1,0 +1,57 @@
+/* 黑金风格 - 无换肤 */
+:root {
+	--text: #9ca3af;
+	--text-h: #f3f4f6;
+	--bg: #0d0d0d;
+	--border: rgba(255, 255, 255, 0.1);
+	--code-bg: #1e1e1e;
+	--accent: #f2c94c;
+	--accent-bg: rgba(242, 201, 76, 0.15);
+	--accent-border: rgba(242, 201, 76, 0.5);
+	--mono: ui-monospace, Consolas, monospace;
+	--sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	font: 14px/1.5 var(--sans);
+	color: var(--text);
+	background: var(--bg);
+	color-scheme: dark;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2 {
+	font-family: var(--sans);
+	font-weight: 600;
+	color: var(--text-h);
+}
+
+h1 {
+	font-size: 1.25rem;
+	margin: 0 0 1rem;
+}
+
+h2 {
+	font-size: 1rem;
+	margin: 0 0 0.5rem;
+}
+
+#app {
+	width: 360px;
+	min-height: 500px;
+	max-width: 100%;
+	margin: 0 auto;
+	background: linear-gradient(180deg, #0d0d0d 0%, #1a1a1a 100%);
+	border: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+}
