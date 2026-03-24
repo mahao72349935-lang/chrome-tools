@@ -1,19 +1,31 @@
 {
+  "appid": "com.mh.tools",
+  "versionName": "1.0.0",
+  "versionCode": 1,
   "manifest_version": 3,
   "name": "mh-tools",
   "version": "1.0.0",
   "description": "mh-tools 工具箱",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
   "action": {
-    "default_popup": "index.html"
+    "default_title": "点击打开表单助手"
   },
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
-    "tabs"
+    "tabs",
+    "sidePanel"
   ],
   "host_permissions": [
     "http://localhost:3000/*",
+    "http://localhost:5173/*",
     "https://api.deepseek.com/*"
   ]
 }
