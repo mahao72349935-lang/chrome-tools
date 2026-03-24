@@ -6,6 +6,7 @@
 <template>
   <div class="home">
     <h1 class="title">mh-tools 工具箱</h1>
+
     <ul class="feature-list">
       <li v-for="item in features" :key="item.path" class="feature-item" @click="goTo(item.path)">
         <span class="feature-name">{{ item.name }}</span>
@@ -26,9 +27,9 @@ const router = useRouter();
 
 const features = [
   {
-    name: '获取弹窗页面表单字段类型',
+    name: '新增数据',
     path: '/dialog-form-fields',
-    desc: '从当前页面的 Element UI 弹窗中提取表单字段及类型',
+    desc: '从当前页面的弹窗中提取表单字段及类型',
   },
   {
     name: '删除数据',
