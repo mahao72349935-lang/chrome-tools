@@ -27,6 +27,12 @@ const router = createRouter({
       component: () => import('../views/delete-data/DeleteData.vue'),
       meta: { title: '删除数据' },
     },
+    {
+      path: '/listen-behavior',
+      name: 'ListenBehavior',
+      component: () => import('../views/listen-behavior/ListenBehavior.vue'),
+      meta: { title: '监听行为' },
+    },
   ],
 });
 

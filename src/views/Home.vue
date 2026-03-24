@@ -35,7 +35,12 @@ const features = [
     name: '删除数据',
     path: '/delete-data',
     desc: '删除当前页面的数据',
-  }
+  },
+  {
+    name: '监听行为',
+    path: '/listen-behavior',
+    desc: '监听当前页面的行为',
+  },
   // 后续可在此添加更多功能
 ];
 
