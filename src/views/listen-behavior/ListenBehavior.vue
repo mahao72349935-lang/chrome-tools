@@ -437,7 +437,7 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  margin-bottom: 10px;
+  padding: 10px 0;
   color: #9ca3af;
 }
 
