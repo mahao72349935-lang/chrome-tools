@@ -81,8 +81,10 @@ import { ArrowLeft, CircleCheck } from '@element-plus/icons-vue';
 import AppCard from '../../components/AppCard/AppCard.vue';
 import { runDelete } from '../../api/delete';
 import { getFilterFormItems } from '../../utils/get-filter-form-items';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const fetching = ref(false);
 const error = ref('');
@@ -185,6 +187,8 @@ const handleDelete = async () => {
       filters: parsedFilters.value,
       location: location.value,
       menuName: menuName.value || '',
+      username: authStore.username,
+      password: authStore.password,
     });
 
     ElMessage.success('删除请求已发送');

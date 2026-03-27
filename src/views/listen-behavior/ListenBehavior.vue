@@ -92,8 +92,10 @@ import {
   type RecordedStep,
 } from '../../utils/behavior-record';
 import { generateReplayValuesFromSteps } from '../../utils/deepseek';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const error = ref('');
 const isRecording = ref(false);
 const starting = ref(false);
@@ -254,7 +256,11 @@ const handleGenerateData = async () => {
       }))
       .filter((s) => s.type === 'input' || s.type === 'change');
 
-    const res = await generateReplayValuesFromSteps({ steps: forAi });
+    const res = await generateReplayValuesFromSteps({
+      steps: forAi,
+      username: authStore.username,
+      password: authStore.password,
+    });
     if (res.success && res.data) {
       replayValuesJson.value = res.data;
       ElMessage.success('假数据已生成，可直接回放或手动修改 JSON');

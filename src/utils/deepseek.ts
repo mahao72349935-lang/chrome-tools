@@ -117,6 +117,8 @@ export interface BehaviorStepForAi {
 
 export interface GenerateReplayValuesParams {
 	steps: BehaviorStepForAi[];
+	username?: string;
+	password?: string;
 }
 
 function buildBehaviorReplayPrompt(steps: BehaviorStepForAi[]): string {

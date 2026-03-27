@@ -7,6 +7,29 @@
   <div class="home">
     <h1 class="title">mh-tools 工具箱</h1>
 
+    <!-- 账号信息区域 -->
+    <div class="auth-card">
+      <div class="auth-field">
+        <label class="auth-label">用户名</label>
+        <el-input
+          v-model="authStore.username"
+          class="auth-input"
+          placeholder="请输入用户名"
+          size="small"
+        />
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">密码</label>
+        <el-input
+          v-model="authStore.password"
+          class="auth-input"
+          placeholder="请输入密码"
+          size="small"
+          show-password
+        />
+      </div>
+    </div>
+
     <ul class="feature-list">
       <li v-for="item in features" :key="item.path" class="feature-item" @click="goTo(item.path)">
         <span class="feature-name">{{ item.name }}</span>
@@ -22,8 +45,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { ArrowRight } from '@element-plus/icons-vue';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const features = [
   {
@@ -63,6 +88,64 @@ const goTo = (path: string) => {
   margin: 0 0 1rem;
   color: #f3f4f6;
   font-weight: 600;
+}
+
+/* 账号信息卡片 */
+.auth-card {
+  background: #1e1e1e;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-label {
+  font-size: 12px;
+  color: #9ca3af;
+  min-width: 44px;
+  flex-shrink: 0;
+}
+
+.auth-input {
+  flex: 1;
+  --el-input-focus-border-color: #f2c94c;
+  --el-input-hover-border-color: #f2c94c;
+  --el-color-primary: #f2c94c;
+}
+
+.auth-input :deep(.el-input__wrapper) {
+  background: #262626 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.auth-input :deep(.el-input__wrapper:hover),
+.auth-input :deep(.el-input__wrapper.is-focus) {
+  border-color: #f2c94c !important;
+  box-shadow: 0 0 0 1px rgba(242, 201, 76, 0.3) inset !important;
+}
+
+.auth-input :deep(.el-input__inner) {
+  color: #f3f4f6;
+  background: transparent;
+  font-size: 13px;
+}
+
+.auth-input :deep(.el-input__password) {
+  color: #9ca3af;
+}
+
+.auth-input :deep(.el-input__password:hover) {
+  color: #f2c94c;
 }
 
 .feature-list {

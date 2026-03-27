@@ -10,6 +10,8 @@ export interface RunDeleteParams {
 	filters: Array<{ label: string; value: string }>;
 	location: string;
 	menuName?: string;
+	username?: string;
+	password?: string;
 }
 
 export interface RunDeleteResponse {

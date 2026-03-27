@@ -80,8 +80,10 @@ import { runPlaywright } from '../../api/playwright';
 import { generateMockData } from '../../utils/deepseek';
 import { clickPageButton } from '../../utils/click-page-button';
 import { getFormFieldsScript } from '../../utils/form-fields';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref('');
 const useDeepSeekMock = ref(false);
@@ -194,6 +196,8 @@ const handleRunScript = async () => {
     location: pageInfo.value?.url || '',
     menuName: pageInfo.value?.menuName || '',
     mockData: mockDataArr,
+    username: authStore.username,
+    password: authStore.password,
   };
   console.log('params: ', params);
   const res = await runPlaywright(params);
