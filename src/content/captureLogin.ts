@@ -55,12 +55,12 @@ function isLoginButton(el: Element): boolean {
 }
 
 function sendCredentials(): void {
-	const creds = readCredentials();
-	if (!creds || (!creds.username && !creds.password)) return;
+	const loginInfo = readCredentials();
+	if (!loginInfo || (!loginInfo.username && !loginInfo.password)) return;
 	chrome.runtime.sendMessage({
 		type: 'MH_LOGIN_CAPTURED',
-		username: creds.username,
-		password: creds.password,
+		username: loginInfo.username,
+		password: loginInfo.password,
 	});
 }
 
