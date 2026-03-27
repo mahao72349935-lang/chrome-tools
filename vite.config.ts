@@ -30,10 +30,13 @@ export default defineConfig({
 			input: {
 				main: resolve(__dirname, 'index.html'),
 				background: resolve(__dirname, 'src/background/index.ts'),
+				'content-login': resolve(__dirname, 'src/content/captureLogin.ts'),
 			},
 			output: {
 				entryFileNames: (chunkInfo) => {
-					return chunkInfo.name === 'background' ? 'background.js' : 'assets/[name]-[hash].js';
+					if (chunkInfo.name === 'background') return 'background.js';
+					if (chunkInfo.name === 'content-login') return 'content-login.js';
+					return 'assets/[name]-[hash].js';
 				},
 			},
 		},
