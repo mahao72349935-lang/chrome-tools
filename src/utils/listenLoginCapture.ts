@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: mahao
+ * @Date: 2026-03-27 16:32:36
+ * @LastEditors: mahao
+ * @LastEditTime: 2026-03-27 17:03:37
+ */
 /**
  * @Description: 监听来自登录页 content script 的凭证消息，自动更新 authStore
  * @Author: mahao
@@ -8,9 +15,9 @@
 import { useAuthStore } from '../stores/useAuthStore';
 
 interface LoginCapturedMessage {
-  type: 'MH_LOGIN_CAPTURED';
-  username: string;
-  password: string;
+	type: 'MH_LOGIN_CAPTURED';
+	username: string;
+	password: string;
 }
 
 let listenerAttached = false;
@@ -21,19 +28,18 @@ let listenerAttached = false;
  * 重复调用是安全的，内部做了幂等保护。
  */
 export function setupLoginCaptureListener(): void {
-  if (listenerAttached) return;
-  listenerAttached = true;
+	if (listenerAttached) return;
+	listenerAttached = true;
 
-  chrome.runtime.onMessage.addListener((message: LoginCapturedMessage) => {
-    if (message.type !== 'MH_LOGIN_CAPTURED') return;
+	chrome.runtime.onMessage.addListener((message: LoginCapturedMessage) => {
+		if (message.type !== 'MH_LOGIN_CAPTURED') return;
+		const authStore = useAuthStore();
 
-    const authStore = useAuthStore();
-
-    if (message.username) {
-      authStore.username = message.username;
-    }
-    if (message.password) {
-      authStore.password = message.password;
-    }
-  });
+		if (message.username) {
+			authStore.username = message.username;
+		}
+		if (message.password) {
+			authStore.password = message.password;
+		}
+	});
 }
