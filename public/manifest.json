@@ -25,7 +25,17 @@
   ],
   "host_permissions": [
     "http://localhost:3000/*",
-    "http://localhost:5173/*",
-    "https://api.deepseek.com/*"
+    "http://localhost:5173/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*"
+      ],
+      "js": ["content-login.js"],
+      "run_at": "document_end",
+      "type": "module"
+    }
   ]
 }
