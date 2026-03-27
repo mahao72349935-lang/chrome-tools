@@ -43,12 +43,18 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ArrowRight } from '@element-plus/icons-vue';
 import { useAuthStore } from '../stores/useAuthStore';
+import { setupLoginCaptureListener } from '../utils/listenLoginCapture';
 
 const router = useRouter();
 const authStore = useAuthStore();
+
+onMounted(() => {
+  setupLoginCaptureListener();
+});
 
 const features = [
   {
